@@ -46,31 +46,13 @@ class _RecordPageState extends State<RecordPage>{
                   minWidth: 200.0,
                   height: 2,
                   // TODO: place button in futureBuilder
-                  child: new RawMaterialButton(
-                    onPressed: () {
-                      setState(() async {
-                        bool hasPermissions = await AudioRecorder.hasPermissions;
-                        bool isRecording = await AudioRecorder.isRecording;
-                        // await AudioRecorder.start(path: _controller.text, audioOutputFormat: AudioOutputFormat.mp4);
-
-                        _isRecording = !_isRecording;
-                      });
-                    },
-                    child: _isRecording ? new Icon(
-                      Icons.stop,
-                      color: Colors.white,
-                      size: 100.0,
-                    ): new Text("REC", style: TextStyle(color: Colors.white, fontSize: 50)),
-                    shape: new ContinuousRectangleBorder(),
-                    elevation: 2.0,
-                    padding: const EdgeInsets.all(70.0),
-                  ),
+                  child: new RecordButton(),
                 ),
               ),
               Container(
                 margin: const EdgeInsets.all(5.0),
                 padding: const EdgeInsets.all(5.0),
-                height: MediaQuery.of(context).size.height / 8,
+                height: MediaQuery.of(context).size.height / 9,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
@@ -87,7 +69,7 @@ class _RecordPageState extends State<RecordPage>{
               Container(
                 margin: const EdgeInsets.all(5.0),
                 padding: const EdgeInsets.all(5.0),
-                height: MediaQuery.of(context).size.height / 8,
+                height: MediaQuery.of(context).size.height / 9,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
@@ -113,10 +95,10 @@ class RecordButton extends StatefulWidget{
   _RecordButtonState createState() => _RecordButtonState();
 }
 
-class _RecordButtonState extends State<RecordPage> {
+class _RecordButtonState extends State<RecordButton> {
   Recording _recordFile;
   bool _isRecording = false;
-  String tempFilename = "testFilePlsIgnore";
+  String tempFilename = "tempFilePlsIgnore";
 
 
   File defaultAudioFile;
@@ -128,10 +110,18 @@ class _RecordButtonState extends State<RecordPage> {
     // Await return of Recording object
     var recording = await AudioRecorder.stop();
     bool isRecording = await AudioRecorder.isRecording;
-
+    Directory docDir = await getApplicationDocumentsDirectory();
     // final storage = SharedAudioContext.of(context).storage;
     // Directory docDir = await storage.docDir;
-    Directory docDir = await getApplicationDocumentsDirectory();
+
+
+    // TODO: put network stuff here
+
+
+    String newFilePath = p.join(docDir.path, this.tempFilename);
+    File tempAudioFile = File(newFilePath+'.m4a');
+    //tempAudioFile.delete();
+
     setState(() {
       //Tells flutter to rerun the build method
       _isRecording = isRecording;
@@ -148,11 +138,9 @@ class _RecordButtonState extends State<RecordPage> {
       //Directory docDir = await storage.docDir;
       Directory docDir = await getApplicationDocumentsDirectory();
       String newFilePath = p.join(docDir.path, this.tempFilename);
+      print("hi: " + newFilePath);
       File tempAudioFile = File(newFilePath+'.m4a');
-      Scaffold
-          .of(context)
-          .showSnackBar(new SnackBar(content: new Text("Recording."),
-        duration: Duration(milliseconds: 1400), ));
+
       if (await tempAudioFile.exists()){
         await tempAudioFile.delete();
       }
@@ -176,6 +164,7 @@ class _RecordButtonState extends State<RecordPage> {
         defaultAudioFile = tempAudioFile;
       });
     } catch (e) {
+      print("lol");
       print(e);
     }
   }
@@ -192,16 +181,22 @@ class _RecordButtonState extends State<RecordPage> {
   }
   @override
   Widget build(BuildContext context) {
+    // Check if the AudioRecorder is currently recording before building the rest of the Page
+    // If we do not check this,
+    return FutureBuilder<bool>(
+        future: AudioRecorder.isRecording,
+        builder: recordButtonBuilder
+    );
+  }
+
+
+  Widget recordButtonBuilder(BuildContext context, AsyncSnapshot snapshot) {
     return (
         new RawMaterialButton(
           onPressed: () {
-            setState(() async {
-              bool hasPermissions = await AudioRecorder.hasPermissions;
-              bool isRecording = await AudioRecorder.isRecording;
-              await AudioRecorder.start(path: _controller.text, audioOutputFormat: AudioOutputFormat.mp4);
-
-              _isRecording = !_isRecording;
-            });
+            _isRecording
+              ? stopRecording()
+              : startRecording();
           },
           child: _isRecording ? new Icon(
             Icons.stop,
@@ -212,6 +207,7 @@ class _RecordButtonState extends State<RecordPage> {
           shape: new ContinuousRectangleBorder(),
           elevation: 2.0,
           padding: const EdgeInsets.all(70.0),
-        ))
+        )
+    );
   }
 }

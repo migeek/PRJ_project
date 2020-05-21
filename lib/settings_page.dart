@@ -37,15 +37,6 @@ class settings_page extends StatelessWidget {
           'Dark Theme',
           'dark',
           'ui_theme',
-        ),RadioPreference(
-          'Grey Theme',
-          'grey',
-          'ui_theme',
-        ),
-        RadioPreference(
-          'Other Theme',
-          'other',
-          'ui_theme',
         ),
       ]),
     );
