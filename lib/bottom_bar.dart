@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'inbox_list.dart';
 import 'record_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'settings_page.dart';
 
 class Home_Bar extends StatefulWidget {
+  Home_Bar();
   @override
   State<StatefulWidget> createState() {
     return _Home_Bar_State();

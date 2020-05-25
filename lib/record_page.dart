@@ -5,7 +5,13 @@ import 'package:simple_permissions/simple_permissions.dart'; // get permissions
 import 'package:audio_recorder/audio_recorder.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:io' show Platform;
+
 import 'package:path/path.dart' as p;
+// import 'package:flutter_sound/flutter_sound.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+
 
 class RecordPage extends StatefulWidget {
   List<String> entries;
@@ -114,12 +120,41 @@ class _RecordButtonState extends State<RecordButton> {
     // final storage = SharedAudioContext.of(context).storage;
     // Directory docDir = await storage.docDir;
 
+    // file conversion
+    /*String inputFile = p.join(docDir.path, this.tempFilename+'.m4a');
+    String outputFile = p.join(docDir.path, this.tempFilename+'.mp3');
+    await flutterSoundHelper.convertFile(inputFile, Codec.aacMP4, outputFile, Codec.mp3);*/
 
+    //attempt 2
+    final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+    String inputFile = p.join(docDir.path, this.tempFilename);
+    if (Platform.isAndroid) {
+      // Android-specific code
+      // _flutterFFmpeg.execute("-i ${inputFile}.m4a filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
+      // todo: check to see if this DUMB ENCODER WILL WORK!!!1!!!!
+      _flutterFFmpeg.execute("-i ${inputFile}.mp4 -ab 128k -ac 2 -ar 44100 filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
+
+
+    } else if (Platform.isIOS) {
+      // iOS-specific code
+      _flutterFFmpeg.execute("-i ${inputFile}.mp4 filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
+    }
+
+
+
+
+    String url = "";
     // TODO: put network stuff here
+    // var req = http.MultipartRequest('POST', Uri.parse(url));
+    var response = await http.post(url, body: {'id': '1234', 'body': 'hi'});
+    print('Response status:  ${response.statusCode}');
+    print('Response body: ${response.body}');
+    // print(awa)
+
 
 
     String newFilePath = p.join(docDir.path, this.tempFilename);
-    File tempAudioFile = File(newFilePath+'.m4a');
+
     //tempAudioFile.delete();
 
     setState(() {
@@ -132,7 +167,6 @@ class _RecordButtonState extends State<RecordButton> {
 
 
   startRecording() async {
-
     try {
       //final storage = SharedAudioContext.of(context).storage;
       //Directory docDir = await storage.docDir;
@@ -140,8 +174,8 @@ class _RecordButtonState extends State<RecordButton> {
       String newFilePath = p.join(docDir.path, this.tempFilename);
       print("hi: " + newFilePath);
       File tempAudioFile = File(newFilePath+'.m4a');
-
       if (await tempAudioFile.exists()){
+        print("file already found");
         await tempAudioFile.delete();
       }
       if (await AudioRecorder.hasPermissions) {
