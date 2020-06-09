@@ -17,7 +17,6 @@ class Home_Bar extends StatefulWidget {
 class _Home_Bar_State extends State<Home_Bar> {
 
   static List<String> entries = <String>['A', 'B', 'C','D','E'];
-  static List<bool> unread = <bool>[true, false, false, true, false];
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +47,7 @@ class _Home_Bar_State extends State<Home_Bar> {
               case 0:
                 return CupertinoTabView(
                   builder: (BuildContext context) {
-                    return InboxList(entries, unread);
+                    return InboxList(entries,);
                   },
                   defaultTitle: 'Colors',
                 );

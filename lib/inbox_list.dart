@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'inbox_page.dart';
+import 'temp_global.dart';
 class InboxList extends StatelessWidget {
   List<String> entries;
-  List<bool> unread;
   Color backgroundColor = Colors.white;
-  InboxList(this.entries, this.unread);
+  InboxList(this.entries);
   @override
   Widget build(BuildContext context) {
 
@@ -19,7 +19,7 @@ class InboxList extends StatelessWidget {
             padding: const EdgeInsets.all(5),
             itemCount: entries.length,
             itemBuilder: (BuildContext context, int index) {
-              return inbox_container(entries, unread, index);
+              return inbox_container(entries, DevInfo.unread, index);
             }
         )
     );
@@ -44,11 +44,13 @@ class _inbox_containerState extends State<inbox_container> with SingleTickerProv
   int index;
   List<bool> unread;
   _inbox_containerState(this.entries, this.unread, this.index);
+
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _timer = Timer.periodic(_animationDuration, (timer) => _changeColor());
     _color = Colors.red;
+    connectToSocket(context);
   }
 
   void _changeColor() {

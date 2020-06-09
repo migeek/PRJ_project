@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import 'package:simple_permissions/simple_permissions.dart'; // get permissions
@@ -5,13 +7,18 @@ import 'package:simple_permissions/simple_permissions.dart'; // get permissions
 import 'package:audio_recorder/audio_recorder.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:imei_plugin/imei_plugin.dart';
+
+import 'dart:convert';
+import 'dart:core';
+// import 'dart:utf';
 import 'dart:io' show Platform;
 
 import 'package:path/path.dart' as p;
 // import 'package:flutter_sound/flutter_sound.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-
+import 'temp_global.dart';
 
 class RecordPage extends StatefulWidget {
   List<String> entries;
@@ -126,27 +133,56 @@ class _RecordButtonState extends State<RecordButton> {
     await flutterSoundHelper.convertFile(inputFile, Codec.aacMP4, outputFile, Codec.mp3);*/
 
     //attempt 2
+
     final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
     String inputFile = p.join(docDir.path, this.tempFilename);
+    /*
+    // _flutterFFmpeg.execute("-encoders").then((rc) => print("FFmpeg process exited with rc $rc"));
     if (Platform.isAndroid) {
       // Android-specific code
       // _flutterFFmpeg.execute("-i ${inputFile}.m4a filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
-      // todo: check to see if this DUMB ENCODER WILL WORK!!!1!!!!
+      // todo: check to see if this encoder will work
       _flutterFFmpeg.execute("-i ${inputFile}.mp4 -ab 128k -ac 2 -ar 44100 filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
 
 
     } else if (Platform.isIOS) {
       // iOS-specific code
-      _flutterFFmpeg.execute("-i ${inputFile}.mp4 filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
+      _flutterFFmpeg.execute("-i ${inputFile}.m4a -acodec lame filename.mp3").then((rc) => print("FFmpeg process exited with rc $rc"));
     }
+    */
 
 
 
 
-    String url = "";
     // TODO: put network stuff here
+    String url = "";
+    String URI = DevInfo.URI;
+    String nameSpace = "postMessage";
     // var req = http.MultipartRequest('POST', Uri.parse(url));
-    var response = await http.post(url, body: {'id': '1234', 'body': 'hi'});
+    String tempToken = DevInfo.token;
+    String tempReceiver = "2C9737C04DF14814AEA5BFF7086EF99D";
+    var imei = await ImeiPlugin.getImei();
+    String devNum = await imei.replaceAll("-", "");
+    /*var request = http.MultipartRequest('POST', Uri.parse(URI + nameSpace));
+    request.files.add(
+        await http.MultipartFile.fromPath(
+            'data',
+            inputFile + ".m4a"
+        )
+    );
+    request.fields["token"] = tempToken;
+    request.fields["devNum"] = devNum;
+    request.fields["receiver"] = tempReceiver;
+    request.fields["keys"] = "test1234566";
+    request.fields["key2"] = "1234test";
+    var res = await request.send();
+    print("result: " + res.toString());*/
+    var bdata = new ByteData(8);
+    bdata.setFloat32(0, 3.04);
+    var e = new Utf8Codec();
+    var test1234 = File(inputFile + ".m4a").readAsBytesSync();
+    print(test1234);
+    var response = await http.post(URI + nameSpace, headers: {"Content-Type": "application/json"}, body: jsonEncode({'token': tempToken,'devNum': devNum,'receiver': tempReceiver,'data': e.encode('Lorem ipsum dolor sit amet, consetetur...')}));
     print('Response status:  ${response.statusCode}');
     print('Response body: ${response.body}');
     // print(awa)
@@ -183,7 +219,7 @@ class _RecordButtonState extends State<RecordButton> {
             path: newFilePath, audioOutputFormat: AudioOutputFormat.AAC);
       } else {
         // request permissions to record
-        // TODO: find a better place to put this
+
         requestPermissions();
 
         // Uncomment if you want to show an error message
