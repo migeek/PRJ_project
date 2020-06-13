@@ -1,0 +1,16 @@
+FROM python:3.8-buster
+
+WORKDIR /home/familyVoice
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY app ./app
+COPY server ./server
+COPY commserver.py . 
+ENV FLASK_APP commserver.py
+
+EXPOSE 9999
+ENTRYPOINT ["python"]
+CMD ["commserver.py"]

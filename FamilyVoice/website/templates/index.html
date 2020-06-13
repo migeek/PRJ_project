@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{{wtf.quick_form(addForm, action="/index")}}<br><br>
+
+<p>Family Members</p>
+
+<table class="table table-hover">
+   
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Device Number</th>
+        <th></th>
+        <th></th>
+
+    </tr>
+    
+    {% for member in family %}
+        <tr>
+            <td><form id={{member.devNum}} method="post" action="/index">{{ delForm.hidden_tag() }}</form></td>
+            <td>{{ delForm.memberName(form=member.devNum, readonly=True, value=member.name, style="border:0;background-color:inherit;cursor:default" )}}</td>
+            <td>{{ delForm.devNum(form=member.devNum, readonly=True, value=member.devNum, style="border:0;background-color:inherit;cursor:default" )}}</td>
+            <td>{{ delForm.delete(form=member.devNum, class="btn btn-danger")}}</td>
+            <td><a href= "{{ url_for('config', userDev=member.devNum) }}" class="btn btn-info" role="button">Configure</a></td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
+
+
+
+        

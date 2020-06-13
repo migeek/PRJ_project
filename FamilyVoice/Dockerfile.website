@@ -1,0 +1,17 @@
+FROM python:3.8-buster
+
+WORKDIR /home/familyVoice
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY app ./app
+COPY website ./website
+COPY websiteMain.py . 
+
+ENV FLASK_APP websiteMain.py
+
+EXPOSE 8000
+ENTRYPOINT ["flask"]
+CMD ["run", "--host=0.0.0.0.", "--port", "8000"]

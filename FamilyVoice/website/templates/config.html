@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h2> {{memberName}} Orderings</h2>
+
+<form id="config" method="post" action="">{{ orderings.hidden_tag() }}</form>
+
+<table class="table table-hover">
+   
+    <tr>
+        <th></th>
+        <th>Order</th>
+        <th>Name</th>
+        <th>Device Number</th>
+    </tr>
+    
+    {% for ordering in orderings.memberFields %}
+        <tr>       
+            <td>{{ ordering.hidden_tag() }} </td>
+            <td>{{ ordering.order(form="config", style="cursor:pointer")}}</td>
+            <td>{{ ordering.memberName(form="config", readonly=True, style="border:0;background-color:inherit;cursor:default")}}</td>
+            <td>{{ ordering.devNum(form="config", readonly=True, style="border:0;background-color:inherit;cursor:default" )}}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+{{ orderings.submit(form="config", class="btn btn-primary") }}
+
+{% for error in orderings.memberFields.errors %}
+<div class="alert alert-danger", role="alert">{{ error }}</div>
+{% endfor %}
+
+{% endblock %}
+
+
+        
