@@ -34,13 +34,15 @@ def connect():
     user = User.query.filter_by(devNum = devNum).first()
     user.room = request.sid 
     db.session.commit()
-    
-    notifyOfMessages(user)
-    token = jwt.encode(dict(devNum = devNum), app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-        
+            
+    token = jwt.encode(dict(devNum = devNum), app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8') 
    
     updateTablePayload = getMembersTable(user)
     socketio.emit("wakeUp", dict(token = token, table = updateTablePayload), room=user.room)
+    
+    if user.incoming.all():
+        socketio.emit("messagesExist", room=user.room)
+
 
         
 class MessageAPI(Resource):
@@ -97,7 +99,9 @@ class MessageAPI(Resource):
         msg = Message(sender_id=sender.id, receiver_id=receiver.id, data=data)
         db.session.add(msg)
         db.session.commit()
-        notifyOfMessages(receiver)
+        
+        if receiver.incoming.all():
+            socketio.emit("messagesExist", room=receiver.room)
         
         return "OK", status.HTTP_200_OK
 
@@ -122,3 +126,5 @@ class TableAPI(Resource):
         return getMembersTable(user)
             
 api.add_resource(MessageAPI, '/message', endpoint='message')
+api.add_resource(TableAPI, '/table', endpoint='table')
+
