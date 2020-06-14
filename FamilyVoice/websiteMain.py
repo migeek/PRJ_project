@@ -1,2 +1,0 @@
-
-from website import app
