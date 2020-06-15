@@ -18,7 +18,7 @@ import 'package:path/path.dart' as p;
 // import 'package:flutter_sound/flutter_sound.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-import 'temp_global.dart';
+import 'global.dart';
 
 class RecordPage extends StatefulWidget {
   List<String> entries;
@@ -58,7 +58,7 @@ class _RecordPageState extends State<RecordPage>{
                 child: ButtonTheme(
                   minWidth: 200.0,
                   height: 2,
-                  // TODO: place button in futureBuilder
+
                   child: new RecordButton(),
                 ),
               ),
@@ -128,12 +128,13 @@ class _RecordButtonState extends State<RecordButton> {
     // Directory docDir = await storage.docDir;
 
     // file conversion
-    /*String inputFile = p.join(docDir.path, this.tempFilename+'.m4a');
-    String outputFile = p.join(docDir.path, this.tempFilename+'.mp3');
-    await flutterSoundHelper.convertFile(inputFile, Codec.aacMP4, outputFile, Codec.mp3);*/
+    // String input_File = p.join(docDir.path, this.tempFilename+'.m4a');
+    // String outputFile = p.join(docDir.path, this.tempFilename+'.mp3');
+    // await flutterSoundHelper.convertFile(input_File, Codec.aacMP4, outputFile, Codec.mp3);
 
     //attempt 2
 
+    //nope
     final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
     String inputFile = p.join(docDir.path, this.tempFilename);
     /*
@@ -154,15 +155,14 @@ class _RecordButtonState extends State<RecordButton> {
 
 
 
-    // TODO: put network stuff here
+
     String url = "";
     String URI = DevInfo.URI;
     String nameSpace = "postMessage";
     // var req = http.MultipartRequest('POST', Uri.parse(url));
     String tempToken = DevInfo.token;
     String tempReceiver = "2C9737C04DF14814AEA5BFF7086EF99D";
-    var imei = await ImeiPlugin.getImei();
-    String devNum = await imei.replaceAll("-", "");
+    String devNum = DevInfo.devNo;
     /*var request = http.MultipartRequest('POST', Uri.parse(URI + nameSpace));
     request.files.add(
         await http.MultipartFile.fromPath(
@@ -181,8 +181,10 @@ class _RecordButtonState extends State<RecordButton> {
     bdata.setFloat32(0, 3.04);
     var e = new Utf8Codec();
     var test1234 = File(inputFile + ".m4a").readAsBytesSync();
+    Uint8List bytes = File(inputFile + ".m4a").readAsBytesSync();
+
     print(test1234);
-    var response = await http.post(URI + nameSpace, headers: {"Content-Type": "application/json"}, body: jsonEncode({'token': tempToken,'devNum': devNum,'receiver': tempReceiver,'data': e.encode('Lorem ipsum dolor sit amet, consetetur...')}));
+    var response = await http.post(URI + nameSpace, headers: {"Content-Type": "application/json"}, body: jsonEncode({'token': tempToken,'devNum': devNum,'receiver': tempReceiver,'data': bytes}));
     print('Response status:  ${response.statusCode}');
     print('Response body: ${response.body}');
     // print(awa)

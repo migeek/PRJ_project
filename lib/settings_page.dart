@@ -1,44 +1,97 @@
 import 'package:flutter/material.dart';
-import 'package:preferences/preferences.dart';
+import 'global.dart';
 
-class settings_page extends StatelessWidget {
+class settings_page extends StatefulWidget {
+
+  settings_page();
+
+  @override
+  _settings_pageState createState() => _settings_pageState();
+}
+
+class _settings_pageState extends State<settings_page> {
   List<String> entries;
 
-  settings_page(this.entries);
   @override
   Widget build(BuildContext context) {
-    List<String> dropDownOptions = ['test op 1', 'test op 2', 'test op 3'];
-    entries = this.entries;
+
+    entries = DevInfo.ids;
     return Scaffold(
       appBar: AppBar(
         title: Text('Preferences'),
       ),
-      body: PreferencePage([
-        PreferenceTitle('General'),
-        DropdownPreference(
-          'Test Pref 1',
-          'drop_down_pref',
-          values: dropDownOptions,
-          defaultVal: dropDownOptions[0],
-        ),
-        SwitchPreference(
-          "Notifications",
-          "insert_the_variable_I_would_change_if_notifications_were_enabled",
-          defaultVal: true,
-        ),
-        PreferenceTitle('Other section'),
-        RadioPreference(
-          'Light Theme',
-          'light',
-          'ui_theme',
-          isDefault: true,
-        ),
-        RadioPreference(
-          'Dark Theme',
-          'dark',
-          'ui_theme',
-        ),
-      ]),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Card(
+              child: ListTile(
+                title: Text("Users' Names:"),
+
+              )
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 20.0),
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    decoration: InputDecoration(labelText: "User 1"),
+                    onSubmitted: (text){
+                      DevInfo.ids[0] = text;
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(labelText: "User 2"),
+                    onSubmitted: (text){
+                      DevInfo.ids[1] = text;
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(labelText: "User 3"),
+                    onSubmitted: (text){
+                      DevInfo.ids[2] = text;
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(labelText: "User 4"),
+                    onSubmitted: (text){
+                      DevInfo.ids[3] = text;
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(labelText: "User 5"),
+                    onSubmitted: (text){
+                      DevInfo.ids[4] = text;
+                    },
+
+                  ),
+
+                ],
+              ),
+
+            ),
+            Row(
+              children: <Widget>[
+                Checkbox(
+                  value: DevInfo.notificationsEnabled,
+                  onChanged: (bool value){
+                    setState( () {
+                      DevInfo.notificationsEnabled = value;
+                    });
+                  }
+                ),
+                Text("Notifications"),
+              ],
+            ),
+            Card(
+                child: ListTile(
+                  title: Text("Device ID: \n\n${DevInfo.devNo}"),
+
+                )
+            ),
+          ]
+        )
+      ),
     );
 
   }

@@ -16,7 +16,7 @@ class Home_Bar extends StatefulWidget {
 // _ in front of a class name indicates that it is private
 class _Home_Bar_State extends State<Home_Bar> {
 
-  static List<String> entries = <String>['A', 'B', 'C','D','E'];
+  // static List<String> entries = <String>['A', 'B', 'C','D','E'];
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class _Home_Bar_State extends State<Home_Bar> {
               case 0:
                 return CupertinoTabView(
                   builder: (BuildContext context) {
-                    return InboxList(entries,);
+                    return InboxList();
                   },
                   defaultTitle: 'Colors',
                 );
@@ -55,7 +55,7 @@ class _Home_Bar_State extends State<Home_Bar> {
               case 1:
                 return CupertinoTabView(
                   builder: (BuildContext context) {
-                    return record_page(entries,);
+                    return record_page();
                   },
                   defaultTitle: 'Support Chat',
                 );
@@ -63,7 +63,7 @@ class _Home_Bar_State extends State<Home_Bar> {
               case 2:
                 return CupertinoTabView(
                   builder: (BuildContext context) {
-                    return settings_page(entries,);
+                    return settings_page();
                   },
                   defaultTitle: 'Account',
                 );

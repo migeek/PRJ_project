@@ -15,13 +15,21 @@ class DevInfo{
   static String getSpace = "getMessage";
   static String postSpace = "postMessage";
   static String token = "";
-  static List<String> ids = ["", "", "", "", ""];
+  static List<String> ids = ["change name in settings",
+    "change name in settings",
+    "change name in settings",
+    "change name in settings",
+    "change name in settings"];
+  static List<String> recvDevNum = ["","","","",""];
   static List<bool> unread = [false, false, false, false, false];
+  static String devNo;
+  static bool notificationsEnabled = true;
 }
 Future<int> connectToSocket(context) async{
   var imei = await ImeiPlugin.getImei();
   print(imei);
   var imeiNoDash = imei.replaceAll("-", "");
+  DevInfo.devNo = imeiNoDash;
   print(imeiNoDash);
 
   print("trying to connect");
@@ -52,6 +60,7 @@ Future<int> connectToSocket(context) async{
     //toJSON(data);
   });
   socket.on("messagesExist", (data) async {
+    DevInfo.unread[0] = true;
     //sample event
     print("messages exist");
     print(data); // JSON with number of messages waiting
@@ -71,6 +80,7 @@ Future<int> connectToSocket(context) async{
       print('Response body: ${response.body}');
       // todo: uncomment when able to get sender
       // unread[sender] = true;
+      //
       i++;
 
     }

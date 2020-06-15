@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'record_page.dart';
-class record_page extends StatelessWidget {
+import 'global.dart';
+
+class record_page extends StatefulWidget {
+
+  record_page();
+
+  @override
+  _record_pageState createState() => _record_pageState();
+}
+
+class _record_pageState extends State<record_page> {
   List<String> entries;
+
   Color backgroundColor = Colors.white;
-  record_page(this.entries);
+
   @override
   Widget build(BuildContext context) {
 
-    entries = this.entries;
+    entries = DevInfo.ids;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +40,9 @@ class record_page extends StatelessWidget {
                 margin: const EdgeInsets.all(3.0),
                 padding: const EdgeInsets.all(5.0),
                 decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black)
+                    border: Border.all(color: Colors.black54),
+                    borderRadius: BorderRadius.all(Radius.circular(9.0)),
+                    color: Colors.white10
                 ),
                 height: 50,
                 //color: Colors.black,

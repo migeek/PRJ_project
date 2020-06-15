@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import "package:serial_number/serial_number.dart";
 import 'package:http/http.dart' as http;
-import 'temp_global.dart';
+import 'global.dart';
+import 'package:path/path.dart' as p;
+import 'package:audioplayers/audioplayers.dart';
+
 
 // import 'package:flutter_socket_io/flutter_socket_io.dart';
 // import 'package:flutter_socket_io/socket_io_manager.dart';
@@ -28,7 +33,7 @@ class _inbox_pageState extends State<inbox_page> {
   List<String> entries;
   int index;
   bool playing = false;
-
+  AudioPlayer audioPlayer = AudioPlayer();
   _inbox_pageState(this.entries, this.index);
 
   SocketIO socket;
@@ -43,7 +48,17 @@ class _inbox_pageState extends State<inbox_page> {
   /*void _onReceiveChatEvent(dynamic data){
     debugPrint(data);
   }*/
+  void _playAudio() async{
 
+    Directory docDir = await getApplicationDocumentsDirectory();
+    String pathName = p.join(docDir.path, "inbox_audio" + index.toString() + ".mp3");
+    print(pathName);
+    audioPlayer.play(pathName, isLocal: true);
+  }
+  void _pauseAudio() async{
+
+    audioPlayer.pause();
+  }
   @override
   Widget build(BuildContext context) {
     entries = this.entries;
@@ -67,10 +82,34 @@ class _inbox_pageState extends State<inbox_page> {
               height: 2,
               child: new RawMaterialButton(
                 onPressed: () {
-                  setState(() {
+                  setState((){
                     playing = !playing;
                     // this is where I would put my audio player if I could find
                     // an audio decoder/encoder
+                    // todo: get an audio player that works converting mp3 to native AND works for all platforms
+
+                    /*
+                    DOES NOT WORK ON IOS ANYMORE!!!!!!
+                    _assetsAudioPlayer = AssetsAudioPlayer();
+                    _assetsAudioPlayer.open(
+                      AssetsAudio(
+                        asset: "test_audio.mp3",
+                        folder: "/",
+                      ),
+                    );
+                    _assetsAudioPlayer.playOrPause();*/
+
+                    /*
+                    has not been updated for flutter 1.12
+                    Future loadMusic() async {
+                      advancedPlayer = await AudioCache().loop("test_audio.mp3");
+                    }*/
+                    if (playing){
+                      _playAudio();
+                    }
+                    else{
+                      _pauseAudio();
+                    }
                   });
                 },
                 child: playing
