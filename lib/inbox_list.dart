@@ -63,6 +63,7 @@ class _inbox_containerState extends State<inbox_container> with SingleTickerProv
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
+          DevInfo.unread[index] = false;
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) =>

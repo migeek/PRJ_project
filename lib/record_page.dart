@@ -59,7 +59,7 @@ class _RecordPageState extends State<RecordPage>{
                   minWidth: 200.0,
                   height: 2,
 
-                  child: new RecordButton(),
+                  child: new RecordButton(index),
                 ),
               ),
               Container(
@@ -104,8 +104,10 @@ class _RecordPageState extends State<RecordPage>{
 
 
 class RecordButton extends StatefulWidget{
+  int index;
+  RecordButton(this.index);
   @override
-  _RecordButtonState createState() => _RecordButtonState();
+  _RecordButtonState createState() => _RecordButtonState(index);
 }
 
 class _RecordButtonState extends State<RecordButton> {
@@ -115,8 +117,8 @@ class _RecordButtonState extends State<RecordButton> {
 
 
   File defaultAudioFile;
-
-
+  int index;
+  _RecordButtonState(this.index);
 
   stopRecording() async {
 
@@ -158,10 +160,10 @@ class _RecordButtonState extends State<RecordButton> {
 
     String url = "";
     String URI = DevInfo.URI;
-    String nameSpace = "postMessage";
+    String nameSpace = "message";
     // var req = http.MultipartRequest('POST', Uri.parse(url));
     String tempToken = DevInfo.token;
-    String tempReceiver = "2C9737C04DF14814AEA5BFF7086EF99D";
+    String tempReceiver = "B343513A87794CFAB53644590C4DA61E";
     String devNum = DevInfo.devNo;
     /*var request = http.MultipartRequest('POST', Uri.parse(URI + nameSpace));
     request.files.add(
@@ -182,9 +184,10 @@ class _RecordButtonState extends State<RecordButton> {
     var e = new Utf8Codec();
     var test1234 = File(inputFile + ".m4a").readAsBytesSync();
     Uint8List bytes = File(inputFile + ".m4a").readAsBytesSync();
-
-    print(test1234);
-    var response = await http.post(URI + nameSpace, headers: {"Content-Type": "application/json"}, body: jsonEncode({'token': tempToken,'devNum': devNum,'receiver': tempReceiver,'data': bytes}));
+    String fileAsBase64 = base64Encode(bytes);
+    print(fileAsBase64);
+    print(DevInfo.token);
+    var response = await http.post(URI + DevInfo.postSpace + "?token=${DevInfo.token}&devNum=${DevInfo.devNo}", headers: {"Content-Type": "application/json"}, body: jsonEncode({'receiver': DevInfo.recvDevNum[index+1],'data': fileAsBase64}));
     print('Response status:  ${response.statusCode}');
     print('Response body: ${response.body}');
     // print(awa)
@@ -199,9 +202,10 @@ class _RecordButtonState extends State<RecordButton> {
       //Tells flutter to rerun the build method
       _isRecording = isRecording;
       // _doQuerySave = true;
-      defaultAudioFile = File(p.join(docDir.path, this.tempFilename+'.m4a'));
+      // defaultAudioFile = File(p.join(docDir.path, this.tempFilename+'.m4a'));
     });
   }
+
 
 
   startRecording() async {
