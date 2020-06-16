@@ -24,8 +24,15 @@ class RegistrationForm(FlaskForm):
             
 
 class FamilyMemberForm(FlaskForm):
+    """
+    Base class to be inherited from if member information is needed
+    """
     memberName = StringField('name', validators=[DataRequired()])
     devNum = StringField('devNum', validators=[DataRequired(), Regexp(r'^[\w]+$', message="Only alphanumeric characters are acceptable as Serial Numbers (Hint: Check spaces)")])
+
+    
+# Only need to seperate the Add and Delete forms to give each their own submit button
+# because examining the data of the submit button is the only way to defrinitate them
 
 class AddMemberForm(FamilyMemberForm):
     add = SubmitField('add')
@@ -33,16 +40,28 @@ class AddMemberForm(FamilyMemberForm):
 class DelMemberForm(FamilyMemberForm):
     delete = SubmitField('delete')
    
+
 class OrderingForm(FamilyMemberForm):
+    """ 
+    Represent and ordering form with no submit button, mainly to be used in a 'FormField'
+    """
     order = SelectField('order', choices= [(i,i) for i in range(1,app.config["MAX_FAMILY_MEMBERS"]+1)] , coerce=int, validators=[DataRequired()])
     def __init__(self, *args, **kwargs):
         super(OrderingForm, self).__init__(meta={'csrf':False}, *args, **kwargs)
         
 class ConfigMemberForm(FlaskForm):
+    """
+    contains a list of OrderingForms whihc will all be treated as a single form and submitted all at once
+    """
+    
     memberFields = FieldList(FormField(OrderingForm))
     submit = SubmitField('submit')
     
     def validate_memberFields(self, memberFields):
+        '''
+        make sure two members don't have the same order
+        '''
+        
         orderings = [member.order.data for member in memberFields]
         
         if len(orderings) != len(set(orderings)):

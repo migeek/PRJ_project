@@ -11,6 +11,11 @@ import base64
 
 @socketio.on("connect")
 def connect():
+    """
+    Establish a connection with a client and provide them with the token to be included
+    in all subsequent HTTP requests
+    """
+    
     print("connect")
     print("request.cookies=", request.cookies.__dict__)
 
@@ -31,7 +36,6 @@ def connect():
         print("ERROR THROWN")
         raise ConnectionRefusedError("No registered user was found for the provided devince number")
     
-    user = User.query.filter_by(devNum = devNum).first()
     user.room = request.sid 
     db.session.commit()
             
@@ -42,10 +46,30 @@ def connect():
     
     if user.incoming.all():
         socketio.emit("messagesExist", room=user.room)
-
+        
+@socketio.on("disconnect")
+def disconnect():
+    """
+    Clean up after client disconnects
+    """
+    
+    devNum = request.args.get("devNum")
+    print(request.args)
+    
+    user = User.query.filter_by(devNum=devNum).first()
+    
+    # Clear the users room to mark them as inactive
+    user.room = None
+    db.session.commit()
+    
 
         
 class MessageAPI(Resource):
+    """
+    A voice message sent from one user to another
+    Supports GETing the message and POSTing a message
+    """
+    
     def __init__(self):
         super(MessageAPI, self).__init__()
 
@@ -59,8 +83,11 @@ class MessageAPI(Resource):
         
         args = self.reqparse.parse_args()
         
-        verifyToken(args['token'])
-
+        try:
+            verifyToken(args['token'])
+        except jwt.exceptions.InvalidTokenError: 
+            return "Not authorized", status.HTTP_403_FORBIDDEN
+        
         receiverDevNum = args["devNum"]
         print("devNum is ", receiverDevNum)
         receiver = User.query.filter_by(devNum=receiverDevNum).first()
@@ -81,13 +108,15 @@ class MessageAPI(Resource):
         print("in post message")
         
         with localParseGuard(self.reqparse) as guard:
-            guard.add_temporary_argument('receiver', type=str, required=True, help='receiver device number was not provided. error: {error_msg}', location='json' )
-            guard.add_temporary_argument('data', type=bytes, required=bytes, help='could not obtain data. error: {error_msg}', location='json')
+            guard.add_local_argument('receiver', type=str, required=True, help='receiver device number was not provided. error: {error_msg}', location='json' )
+            guard.add_local_argument('data', type=bytes, required=bytes, help='could not obtain data. error: {error_msg}', location='json')
             args = self.reqparse.parse_args()
         
-        verifyToken(args['token'])
+        try:
+            verifyToken(args['token'])
+        except jwt.exceptions.InvalidTokenError: 
+            return "Not authorized", status.HTTP_403_FORBIDDEN
 
-       
         senderDevNum = args['devNum']
         sender = User.query.filter_by(devNum=senderDevNum).first()
         receiver = User.query.filter_by(devNum=args['receiver']).first()
@@ -106,6 +135,10 @@ class MessageAPI(Resource):
         return "OK", status.HTTP_200_OK
 
 class TableAPI(Resource):
+    """
+    The table of users for each sibling along with their order
+    supports GETing only
+    """
     def __init__(self):
         super(TableAPI, self).__init__()
 
@@ -115,8 +148,12 @@ class TableAPI(Resource):
         
     def get(self):     
         args = self.reqparse.parse_args()
-        verifyToken(args['token'])
 
+        try:
+            verifyToken(args['token'])
+        except jwt.exceptions.InvalidTokenError: 
+            return "Not authorized", status.HTTP_403_FORBIDDEN
+        
         devNum = args["devNum"]
         user = User.query.filter_by(devNum=devNum).first()
         

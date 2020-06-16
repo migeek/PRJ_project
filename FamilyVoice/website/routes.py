@@ -22,27 +22,30 @@ def config(userDev):
     user = User.query.filter_by(devNum=userDev).first()
     orderings = user.self_orderings.all()
 
-    updateTablePayload = {}
+    
     if configForm.validate_on_submit(): 
         print("in config")
+        
+        # extract each member form from the ordering forms list
         for memberForm in configForm.memberFields:
             member = User.query.filter_by(devNum = memberForm.devNum.data).first()
+            
+            #request all and assert instead of first() for debugging purposes
+            #but should be just first
             memberOrder = user.self_orderings.filter_by(member_id = member.id).all()
             assert len(memberOrder) == 1
-            memberOrder[0].order = int(memberForm.order.data)
-            
-            #build the update json to give to the user
-            updateTablePayload["devNum"] = memberForm.devNum.data
-            updateTablePayload["order"] = memberForm.order.data
-            
+            memberOrder[0].order = memberForm.order.data
+
         db.session.commit()
-        socketio.emit("updateTable", updateTablePayload, room=user.room)
+        socketio.emit("updateTable", room=user.room)
         
         return redirect(url_for('index'))
     
+    #on first call of function we must populate the list with forms
     while len(configForm.memberFields) < len(orderings):
         configForm.memberFields.append_entry()
         
+    # populated forms are empty so we must fill them with data to be displayed
     for i in range(0, len(orderings)):
         assert len(configForm.memberFields) == len(orderings)
         configForm.memberFields[i].memberName.data = orderings[i].member.name
@@ -61,6 +64,9 @@ def index():
     delForm = DelMemberForm()
     family = User.query.filter_by(admin_id=current_user.id).all()
     print("index")
+    
+    #must check data of submit field before a call to validate_on_submit
+    #because it will modifey the fields of the form which will get displayed
     if addForm.add.data and addForm.validate_on_submit():
         print("in add form", addForm.add.label)
         user = User(devNum=addForm.devNum.data, name=addForm.memberName.data, admin_id=current_user.id)
@@ -69,8 +75,12 @@ def index():
         orderings = []
         i = 1
         for member in family:
+            #populate the new member's list of orderings
             user.self_orderings.append(Ordering(member_id=member.id, order=i))
             memberOrderings = member.self_orderings.with_entities(Ordering.order).all()
+            
+            #Quickest way to find an available order for the member is to diff the current list of orders
+            #with the a list containing all possible orders.
             availableOrderings = numpy.setdiff1d(range(1,current_app.config["MAX_FAMILY_MEMBERS"]), memberOrderings)
             assert len(availableOrderings) != 0
             
@@ -106,6 +116,9 @@ def login():
             return redirect(url_for('login'))
         login_user(admin, remember=form.remember_me.data)
         next_page = request.args.get('next')
+        
+        #make sure that next argument is routed to within this application and not to an external site
+        #for security.
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
