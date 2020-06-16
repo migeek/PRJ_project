@@ -1,7 +1,7 @@
 import jwt
 from flask_api import status
-
-        
+from server import app
+  
         
 def getMembersTable(user):
     membersTable = []

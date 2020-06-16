@@ -12,5 +12,5 @@ COPY commserver.py .
 ENV FLASK_APP commserver.py
 
 EXPOSE 9999
-ENTRYPOINT ["python"]
-CMD ["commserver.py"]
+ENTRYPOINT ["gunicorn"]
+CMD ["-k", "eventlet", "-w", "1", "-b", "0.0.0.0:9999", "--log-level", "debug", "commserver:app"]

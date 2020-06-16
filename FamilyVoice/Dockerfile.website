@@ -13,5 +13,5 @@ COPY websiteMain.py .
 ENV FLASK_APP websiteMain.py
 
 EXPOSE 8000
-ENTRYPOINT ["flask"]
-CMD ["run", "--host=0.0.0.0.", "--port", "8000"]
+ENTRYPOINT ["gunicorn"]
+CMD ["-k", "eventlet","-w", "4", "-b", "0.0.0.0:8000", "--log-level", "debug", "websiteMain:app"]

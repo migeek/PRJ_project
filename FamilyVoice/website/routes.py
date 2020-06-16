@@ -87,9 +87,14 @@ def index():
             #Why the int converison? Because numpy lists are of type int64 which mysql doesn't like (works fine on sqlite tho).
             member.self_orderings.append(Ordering(member_id=user.id, order=int(availableOrderings[0]))) 
             db.session.add(member)
+
             i += 1             
 
         db.session.commit()
+        
+        for member in family:
+            #notify members of the addition of another member
+            socketio.emit("updateTable", room=member.room)
         return redirect(url_for('index'))
         
                              

@@ -28,14 +28,11 @@ def connect():
     print(devNum)
     print("the members are", User.query.all())
     user = User.query.filter_by(devNum=devNum).first()
-    print("the device number is", User.query.filter_by(name="Raf").first().devNum)
-    print( User.query.filter_by(name="Raf").first().devNum == devNum)
 
-    
     if not user:
         print("ERROR THROWN")
         raise ConnectionRefusedError("No registered user was found for the provided devince number")
-    
+        
     user.room = request.sid 
     db.session.commit()
             
@@ -74,8 +71,8 @@ class MessageAPI(Resource):
         super(MessageAPI, self).__init__()
 
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument("token", type=str, required=True, help='Token was not provided. error: {error_msg}')
-        self.reqparse.add_argument("devNum", type=str, required=True, help='Device number was not provided. error: {error_msg}')
+        self.reqparse.add_argument("token", type=str, required=True, help='Token was not provided. error: {error_msg}', location='args')
+        self.reqparse.add_argument("devNum", type=str, required=True, help='Device number was not provided. error: {error_msg}', location='args')
         
     def get(self):
         print("in get message")
@@ -97,6 +94,7 @@ class MessageAPI(Resource):
             
         message = receiver.incoming.first()
         if message:
+            print(base64.b64encode(message.data).decode('ascii'))
             json = dict(sender=message.comingFrom.devNum, data=base64.b64encode(message.data).decode('ascii')) #why encode.decode to send binary data??? becauses PYTHON!!
             db.session.delete(message)
             db.session.commit()
@@ -109,7 +107,7 @@ class MessageAPI(Resource):
         
         with localParseGuard(self.reqparse) as guard:
             guard.add_local_argument('receiver', type=str, required=True, help='receiver device number was not provided. error: {error_msg}', location='json' )
-            guard.add_local_argument('data', type=bytes, required=bytes, help='could not obtain data. error: {error_msg}', location='json')
+            guard.add_local_argument('data', type=str, required=True, help='could not obtain data. error: {error_msg}', location='json')
             args = self.reqparse.parse_args()
         
         try:
@@ -120,8 +118,8 @@ class MessageAPI(Resource):
         senderDevNum = args['devNum']
         sender = User.query.filter_by(devNum=senderDevNum).first()
         receiver = User.query.filter_by(devNum=args['receiver']).first()
-        data = args["data"]
-        print('data is', data)
+        data = base64.b64decode(args["data"])
+        print('sender devNum is ', senderDevNum, 'receiver devnum is', receiver )
         if not sender or not receiver  :
             return "Bad sender and/o receiver", status.HTTP_400_BAD_REQUEST
 
@@ -143,8 +141,8 @@ class TableAPI(Resource):
         super(TableAPI, self).__init__()
 
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument("token", type=str, required=True, help='Token was not provided. error: {error_msg}')
-        self.reqparse.add_argument("devNum", type=str, required=True, help='Device number was not provided. error: {error_msg}')
+        self.reqparse.add_argument("token", type=str, required=True, help='Token was not provided. error: {error_msg}', location='args')
+        self.reqparse.add_argument("devNum", type=str, required=True, help='Device number was not provided. error: {error_msg}', location='args')
         
     def get(self):     
         args = self.reqparse.parse_args()
@@ -160,7 +158,7 @@ class TableAPI(Resource):
         if not user:
              return f'Could not fetch user with device number {devNum}', status.HTTP_400_BAD_REQUEST 
             
-        return getMembersTable(user)
+        return dict(table=getMembersTable(user))
             
 api.add_resource(MessageAPI, '/message', endpoint='message')
 api.add_resource(TableAPI, '/table', endpoint='table')

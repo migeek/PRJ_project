@@ -34,7 +34,7 @@ services:
             - "redis"
             - "database"
         restart: always
-        command: commserver.py -hs 0.0.0.0 -p 9999
+        command: --worker-class eventlet -w 1 -b 0.0.0.0:9999 --log-level debug commserver:app 
 
     redis:
         image: "redis:latest"

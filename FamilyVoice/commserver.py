@@ -24,8 +24,9 @@ from server import socketio, app
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-hs", "--host", type=str, help="host address", default='localhost')
-parser.add_argument("-p", "--port", type=int, help="port number", default=9999)
-args = parser.parse_args()
 
-socketio.run(app, host=args.host, port = args.port, debug=True)
+
+#parser.add_argument("-hs", "--host", type=str, help="host address", default='localhost')
+#parser.add_argument("-p", "--port", type=int, help="port number", default=9999)
+#args = parser.parse_args()
+#socketio.run(app, host=args.host, port = args.port, debug=True)
